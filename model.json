@@ -1,0 +1,29 @@
+{
+  "name": "string",
+  "email": "string",
+  "monthlyBudget": {
+    "totalBudget": 0.0,
+    "fixedExpenses": 0.0,
+    "investmentPercentage": 0,
+    "investmentAmount": 0
+  },
+  "days": [
+    {
+      "when": "25/10/2025",
+      "balance": 0,
+      "carried_over": 0,
+      "expenses": [
+        {
+          "what": "string",
+          "category": "string",
+          "howMuch": 0.0
+        },
+        {
+          "what": "string",
+          "category": "string",
+          "howMuch": 0.0
+        }
+      ]
+    }
+  ]
+}
