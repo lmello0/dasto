@@ -2,6 +2,7 @@ package com.lmello.dasto.user.entities;
 
 import com.lmello.dasto.entities.Auditable;
 import com.lmello.dasto.categories.Category;
+import com.lmello.dasto.expenses.Expense;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -40,7 +41,21 @@ public class User extends Auditable {
     private String passwordHash;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Expense> expenses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Category> categories = new ArrayList<>();
+
+    public void addExpense(Expense expense) {
+        expenses.add(expense);
+        expense.setUser(this);
+    }
+
+    public void removeExpense(Expense expense) {
+        expenses.remove(expense);
+        expense.setUser(null);
+    }
+
     public void addCategory(Category category) {
         categories.add(category);
         category.setUser(this);
