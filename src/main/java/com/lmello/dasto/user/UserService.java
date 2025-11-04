@@ -1,14 +1,12 @@
-package com.lmello.dasto.user.services;
+package com.lmello.dasto.user;
 
 import com.lmello.dasto.user.dto.input.CreateUserDTO;
 import com.lmello.dasto.user.dto.input.PatchUserDTO;
 import com.lmello.dasto.user.dto.output.UserResponse;
-import com.lmello.dasto.user.entities.User;
 import com.lmello.dasto.user.exceptions.EmailInUseException;
 import com.lmello.dasto.user.exceptions.InvalidPublicIdException;
 import com.lmello.dasto.user.exceptions.UserAlreadyExistsException;
 import com.lmello.dasto.user.exceptions.UserNotExistsException;
-import com.lmello.dasto.user.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

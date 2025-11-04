@@ -1,4 +1,4 @@
-package com.lmello.dasto.entities;
+package com.lmello.dasto.shared.entities;
 
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;

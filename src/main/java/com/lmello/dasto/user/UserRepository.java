@@ -1,6 +1,5 @@
-package com.lmello.dasto.user.repositories;
+package com.lmello.dasto.user;
 
-import com.lmello.dasto.user.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

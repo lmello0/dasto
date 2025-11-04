@@ -1,9 +1,8 @@
-package com.lmello.dasto.user.controllers;
+package com.lmello.dasto.user;
 
 import com.lmello.dasto.user.dto.input.CreateUserDTO;
 import com.lmello.dasto.user.dto.input.PatchUserDTO;
 import com.lmello.dasto.user.dto.output.UserResponse;
-import com.lmello.dasto.user.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

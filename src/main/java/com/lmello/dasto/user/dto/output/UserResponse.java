@@ -1,6 +1,6 @@
 package com.lmello.dasto.user.dto.output;
 
-import com.lmello.dasto.user.entities.User;
+import com.lmello.dasto.user.User;
 
 public record UserResponse(
         String publicId,

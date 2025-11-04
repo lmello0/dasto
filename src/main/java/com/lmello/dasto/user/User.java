@@ -1,8 +1,8 @@
-package com.lmello.dasto.user.entities;
+package com.lmello.dasto.user;
 
-import com.lmello.dasto.entities.Auditable;
 import com.lmello.dasto.categories.Category;
 import com.lmello.dasto.expenses.Expense;
+import com.lmello.dasto.shared.entities.Auditable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
