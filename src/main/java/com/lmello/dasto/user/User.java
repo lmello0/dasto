@@ -1,6 +1,7 @@
 package com.lmello.dasto.user.entities;
 
 import com.lmello.dasto.entities.Auditable;
+import com.lmello.dasto.categories.Category;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Table(name = "users")
@@ -35,6 +38,18 @@ public class User extends Auditable {
 
     @Column(nullable = false)
     private String passwordHash;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Category> categories = new ArrayList<>();
+    public void addCategory(Category category) {
+        categories.add(category);
+        category.setUser(this);
+    }
+
+    public void removeCategory(Category category) {
+        categories.remove(category);
+        category.setUser(null);
+    }
 
     @PrePersist
     private void setPublicId() {
