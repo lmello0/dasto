@@ -26,23 +26,17 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Page<UserResponse> getAllUsers(Pageable pageable) {
-        Page<User> usersPage = userRepository.findAll(pageable);
-
-        return usersPage.map(UserResponse::new);
+    public Page<User> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable);
     }
 
-    public UserResponse getUserById(String publicId) {
-        UUID uuid = toUUID(publicId);
-
-        User u = userRepository.findByPublicId(uuid)
+    public User getUserById(UUID publicId) {
+        return userRepository.findByPublicId(publicId)
                 .orElseThrow(UserNotExistsException::new);
-
-        return new UserResponse(u);
     }
 
     @Transactional
-    public UserResponse create(CreateUserDTO data) {
+    public User create(CreateUserDTO data) {
         final String email = data.email();
         final String firstName = data.firstName();
         final String lastName = data.lastName();
@@ -60,16 +54,12 @@ public class UserService {
         u.setEmail(email);
         u.setPasswordHash(passwordHash);
 
-        User saved = userRepository.save(u);
-
-        return new UserResponse(saved);
+        return userRepository.save(u);
     }
 
     @Transactional
-    public UserResponse patch(String publicId, PatchUserDTO data) {
-        UUID uuid = toUUID(publicId);
-
-        User existing = userRepository.findByPublicId(uuid)
+    public User patch(UUID publicId, PatchUserDTO data) {
+        User existing = userRepository.findByPublicId(publicId)
                 .orElseThrow(UserNotExistsException::new);
 
         if (!data.firstName().equals(existing.getFirstName())) {
@@ -98,30 +88,18 @@ public class UserService {
             }
         }
 
-        User saved = userRepository.save(existing);
-
-        return new UserResponse(saved);
+        existing.setUpdatedBy("API");
+        existing.setUpdatedAt(OffsetDateTime.now());
+        return userRepository.save(existing);
     }
 
     @Transactional
-    public void delete(String publicId) {
-        UUID uuid = toUUID(publicId);
-
-        User u = userRepository.findByPublicId(uuid)
+    public void delete(UUID publicId) {
+        User u = userRepository.findByPublicId(publicId)
                 .orElseThrow(UserNotExistsException::new);
 
+        u.setDeletedBy("API");
         u.setDeletedAt(OffsetDateTime.now());
         userRepository.save(u);
-    }
-
-    private UUID toUUID(String stringUuid) {
-        UUID uuid;
-        try {
-            uuid = UUID.fromString(stringUuid);
-        } catch (IllegalArgumentException e) {
-            throw new InvalidPublicIdException(stringUuid);
-        }
-
-        return uuid;
     }
 }

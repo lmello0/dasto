@@ -2,6 +2,7 @@ package com.lmello.dasto.user;
 
 import com.lmello.dasto.user.dto.input.CreateUserDTO;
 import com.lmello.dasto.user.dto.input.PatchUserDTO;
+import com.lmello.dasto.user.dto.output.UserDetailResponse;
 import com.lmello.dasto.user.dto.output.UserResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -24,21 +26,24 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<Page<UserResponse>> getUsers(Pageable pageable) {
-        Page<UserResponse> page = userService.getAllUsers(pageable);
+        Page<User> rawPage = userService.getAllUsers(pageable);
+        Page<UserResponse> page = rawPage.map(UserResponse::new);
 
         return ResponseEntity.ok(page);
     }
 
     @GetMapping("/{publicId}")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable String publicId) {
-        UserResponse user = userService.getUserById(publicId);
+    public ResponseEntity<UserDetailResponse> getUserById(@PathVariable UUID publicId) {
+        User u = userService.getUserById(publicId);
+        UserDetailResponse user = new UserDetailResponse(u);
 
         return ResponseEntity.ok(user);
     }
 
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserDTO data) {
-        UserResponse user = userService.create(data);
+    public ResponseEntity<UserDetailResponse> createUser(@Valid @RequestBody CreateUserDTO data) {
+        User u = userService.create(data);
+        UserDetailResponse user = new UserDetailResponse(u);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequestUri()
@@ -50,14 +55,15 @@ public class UserController {
     }
 
     @PatchMapping("/{publicId}")
-    public ResponseEntity<UserResponse> patchUser(@PathVariable String publicId, @Valid @RequestBody PatchUserDTO data) {
-        UserResponse user = userService.patch(publicId, data);
+    public ResponseEntity<UserResponse> patchUser(@PathVariable UUID publicId, @Valid @RequestBody PatchUserDTO data) {
+        User u = userService.patch(publicId, data);
+        UserResponse user = new UserResponse(u);
 
         return ResponseEntity.ok(user);
     }
 
     @DeleteMapping("/{publicId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable String publicId) {
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID publicId) {
         userService.delete(publicId);
 
         return ResponseEntity.noContent().build();

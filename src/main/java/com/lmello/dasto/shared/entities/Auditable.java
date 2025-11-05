@@ -11,7 +11,7 @@ import java.time.OffsetDateTime;
 @MappedSuperclass
 public abstract class Auditable {
     private OffsetDateTime createdAt = OffsetDateTime.now();
-    private String createdBy;
+    private String createdBy = "API";
 
     private OffsetDateTime updatedAt;
     private String updatedBy;
