@@ -1,24 +1,29 @@
 # DASTO
 
-| Method   | Endpoint                              | Detail                                   |
-|----------|---------------------------------------|------------------------------------------|
-| GET      | `/users`                              | get all users                            |
-| GET      | `/users/{id}`                         | get by id                                |
-| POST     | `/users`                              | create a new user                        |
-| PATCH    | `/users/{id}`                         | update a user                            |
-| DELETE   | `/users/{id}`                         | delete a user (soft delete)              |
-|          |                                       |                                          |
-| GET      | `/users/{id}/budgets`                 | get user all budgets config              |
-| GET      | `/users/{id}/budgets/{budget_id}`     | get budget config                        |
-| GET      | `/users/{id}/budgets/active`          | get current active budget config         |
-| POST     | `/users/{id}/budgets`                 | set a new budget config to user          |
-| PATCH    | `/users/{id}/budgets/{budget_id}`     | update the budget config                 |
-|          |                                       |                                          |
-| GET      | `/users/{id}/expenses`                | get users expenses                       |
-| GET      | `/users/{id}/expenses/{expense_id}`   | get detailed expense info                |
-| POST     | `/users/{id}/expenses`                | add a new expense to user                |
-| PATCH    | `/users/{id}/expenses/{expense_id}`   | update expense                           |
-| DELETE   | `/users/{id}/expenses/{expense_id}`   | delete expense                           |
+| Method | Endpoint                                   | Detail                                          |
+|--------|--------------------------------------------|-------------------------------------------------|
+| GET    | `/users`                                   | get all users                                   |
+| GET    | `/users/{id}`                              | get by id                                       |
+| POST   | `/users`                                   | create a new user                               |
+| PATCH  | `/users/{id}`                              | update a user                                   |
+| DELETE | `/users/{id}`                              | delete a user (soft delete)                     |
+|        |                                            |                                                 |
+| GET    | `/users/{user_id}/categories`              | get user categories                             |
+| POST   | `/users/{user_id}/categories`              | create new category in user, it not exists yet  |
+| PUT    | `users/{user_id}/categories/{category_id}` | update user category name                       |
+| DELETE | `users/{user_id}/categories/{category_id}` | delete user category, if does not have expenses |
+|        |                                            |                                                 |
+| GET    | `/users/{id}/budgets`                      | get user all budgets config                     |
+| GET    | `/users/{id}/budgets/{budget_id}`          | get budget config                               |
+| GET    | `/users/{id}/budgets/active`               | get current active budget config                |
+| POST   | `/users/{id}/budgets`                      | set a new budget config to user                 |
+| PATCH  | `/users/{id}/budgets/{budget_id}`          | update the budget config                        |
+|        |                                            |                                                 |
+| GET    | `/users/{id}/expenses`                     | get users expenses                              |
+| GET    | `/users/{id}/expenses/{expense_id}`        | get detailed expense info                       |
+| POST   | `/users/{id}/expenses`                     | add a new expense to user                       |
+| PATCH  | `/users/{id}/expenses/{expense_id}`        | update expense                                  |
+| DELETE | `/users/{id}/expenses/{expense_id}`        | delete expense                                  |
 
 ---
 
