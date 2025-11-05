@@ -1,6 +1,7 @@
 package com.lmello.dasto.categories;
 
 import com.lmello.dasto.expenses.Expense;
+import com.lmello.dasto.shared.entities.Auditable;
 import com.lmello.dasto.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Category {
+public class Category extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
