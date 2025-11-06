@@ -1,4 +1,4 @@
-package com.lmello.dasto.config;
+package com.lmello.dasto.shared.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

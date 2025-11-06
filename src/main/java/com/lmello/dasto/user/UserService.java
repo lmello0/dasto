@@ -2,9 +2,7 @@ package com.lmello.dasto.user;
 
 import com.lmello.dasto.user.dto.input.CreateUserDTO;
 import com.lmello.dasto.user.dto.input.PatchUserDTO;
-import com.lmello.dasto.user.dto.output.UserResponse;
 import com.lmello.dasto.user.exceptions.EmailInUseException;
-import com.lmello.dasto.user.exceptions.InvalidPublicIdException;
 import com.lmello.dasto.user.exceptions.UserAlreadyExistsException;
 import com.lmello.dasto.user.exceptions.UserNotExistsException;
 import jakarta.transaction.Transactional;
@@ -13,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Service
@@ -88,8 +85,6 @@ public class UserService {
             }
         }
 
-        existing.setUpdatedBy("API");
-        existing.setUpdatedAt(OffsetDateTime.now());
         return userRepository.save(existing);
     }
 
@@ -98,8 +93,6 @@ public class UserService {
         User u = userRepository.findByPublicId(publicId)
                 .orElseThrow(UserNotExistsException::new);
 
-        u.setDeletedBy("API");
-        u.setDeletedAt(OffsetDateTime.now());
-        userRepository.save(u);
+        userRepository.delete(u);
     }
 }

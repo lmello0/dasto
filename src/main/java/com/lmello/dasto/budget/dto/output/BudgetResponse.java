@@ -4,7 +4,6 @@ import com.lmello.dasto.budget.Budget;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 
 public record BudgetResponse(
         Long id,
@@ -16,12 +15,12 @@ public record BudgetResponse(
         LocalDateTime effectiveDate,
         LocalDateTime terminationDate,
         boolean isActive,
-        OffsetDateTime createdAt,
+        LocalDateTime createdAt,
         String createdBy,
-        OffsetDateTime updatedAt,
-        String updatedBy
-//        OffsetDateTime deletedAt,
-//        String deletedBy
+        LocalDateTime updatedAt,
+        String updatedBy,
+        LocalDateTime deletedAt,
+        String deletedBy
 ) {
     public BudgetResponse(Budget budget) {
         this(
@@ -37,9 +36,9 @@ public record BudgetResponse(
                 budget.getCreatedAt(),
                 budget.getCreatedBy(),
                 budget.getUpdatedAt(),
-                budget.getUpdatedBy()
-//                budget.getDeletedAt(),
-//                budget.getDeletedBy()
+                budget.getUpdatedBy(),
+                budget.getDeletedAt(),
+                budget.getDeletedBy()
         );
     }
 }

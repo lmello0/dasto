@@ -33,7 +33,7 @@ public class Expense extends Auditable {
     private String description;
 
     @Column(nullable = false)
-    private LocalDateTime date;
+    private LocalDateTime expenseDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
