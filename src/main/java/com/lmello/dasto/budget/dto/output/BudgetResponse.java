@@ -19,9 +19,9 @@ public record BudgetResponse(
         OffsetDateTime createdAt,
         String createdBy,
         OffsetDateTime updatedAt,
-        String updatedBy,
-        OffsetDateTime deletedAt,
-        String deletedBy
+        String updatedBy
+//        OffsetDateTime deletedAt,
+//        String deletedBy
 ) {
     public BudgetResponse(Budget budget) {
         this(
@@ -37,9 +37,9 @@ public record BudgetResponse(
                 budget.getCreatedAt(),
                 budget.getCreatedBy(),
                 budget.getUpdatedAt(),
-                budget.getUpdatedBy(),
-                budget.getDeletedAt(),
-                budget.getDeletedBy()
+                budget.getUpdatedBy()
+//                budget.getDeletedAt(),
+//                budget.getDeletedBy()
         );
     }
 }

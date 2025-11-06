@@ -1,6 +1,7 @@
 package com.lmello.dasto.budget;
 
 import com.lmello.dasto.budget.dto.input.CreateBudgetDTO;
+import com.lmello.dasto.budget.dto.input.PatchBudgetDTO;
 import com.lmello.dasto.budget.dto.output.BudgetResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -55,5 +56,17 @@ public class BudgetController {
                 .toUri();
 
         return ResponseEntity.created(location).body(response);
+    }
+
+    @PatchMapping("/{budgetId}")
+    public ResponseEntity<BudgetResponse> patchBudget(
+            @PathVariable UUID userId,
+            @PathVariable Long budgetId,
+            @RequestBody @Valid PatchBudgetDTO data
+    ) {
+        Budget budget = budgetService.patchBudget(userId, budgetId, data);
+        BudgetResponse response = new BudgetResponse(budget);
+
+        return ResponseEntity.ok(response);
     }
 }

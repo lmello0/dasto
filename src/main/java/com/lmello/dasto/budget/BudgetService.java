@@ -1,6 +1,7 @@
 package com.lmello.dasto.budget;
 
 import com.lmello.dasto.budget.dto.input.CreateBudgetDTO;
+import com.lmello.dasto.budget.dto.input.PatchBudgetDTO;
 import com.lmello.dasto.budget.exceptions.ActiveBudgetNotFoundException;
 import com.lmello.dasto.budget.exceptions.MultipleInvestmentValueException;
 import com.lmello.dasto.user.User;
@@ -49,8 +50,6 @@ public class BudgetService {
 
         budgetRepository.findActiveByUser(user).ifPresent(existingBudget -> {
             existingBudget.terminate(effectiveDate.minusSeconds(1));
-            existingBudget.setDeletedAt(OffsetDateTime.now());
-            existingBudget.setDeletedBy("API");
             budgetRepository.save(existingBudget);
         });
 
@@ -59,17 +58,24 @@ public class BudgetService {
         return budgetRepository.save(budget);
     }
 
+    @Transactional
+    public Budget patchBudget(UUID userId, Long budgetId, PatchBudgetDTO data) {
+        User user = userService.getUserById(userId);
+
+        Budget activeBudget = budgetRepository.findActiveByUser(user)
+                .orElseThrow(() -> new ActiveBudgetNotFoundException(userId));
+
+        Budget updatedBudget = applyPatchToBudget(activeBudget, data);
+        return budgetRepository.save(updatedBudget);
+    }
+
     private Budget buildBudgetFromData(User user, CreateBudgetDTO data, LocalDateTime effectiveDate) {
         BigDecimal total = data.totalAmount();
 
         BigDecimal fixedExpenses = data.fixedExpenses() != null ? data.fixedExpenses() : BigDecimal.ZERO;
         BigDecimal investmentAmount = calculateInvestmentAmount(data, fixedExpenses, total);
         int investmentPercentage = calculateInvestmentPercentage(data, investmentAmount, total);
-
-        BigDecimal availableAmount = total
-                .subtract(investmentAmount)
-                .subtract(fixedExpenses)
-                .setScale(2, RoundingMode.HALF_UP);
+        BigDecimal availableAmount = calculateAvailableAmount(total, investmentAmount, fixedExpenses);
 
         Budget budget = new Budget();
         budget.setTotalAmount(total);
@@ -112,5 +118,64 @@ public class BudgetService {
                 .divide(total, 0, RoundingMode.HALF_UP);
 
         return percentage.intValueExact();
+    }
+
+    private Budget applyPatchToBudget(Budget budget, PatchBudgetDTO data) {
+        BigDecimal total = data.totalAmount() != null ? data.totalAmount() : budget.getTotalAmount();
+        BigDecimal fixedExpenses = data.fixedExpenses() != null ? data.fixedExpenses() : budget.getFixedExpenses();
+        BigDecimal investmentAmount = calculatePatchedInvestmentAmount(data, budget, total, fixedExpenses);
+        int investmentPercentage = calculatePatchedInvestmentPercentage(data, budget, investmentAmount, total);
+        BigDecimal availableAmount = calculateAvailableAmount(total, investmentAmount, fixedExpenses);
+
+        budget.setTotalAmount(total);
+        budget.setFixedExpenses(fixedExpenses);
+        budget.setInvestmentAmount(investmentAmount.setScale(2, RoundingMode.HALF_UP));
+        budget.setInvestmentPercentage(investmentPercentage);
+        budget.setAvailableAmount(availableAmount);
+
+        return budget;
+    }
+
+    private BigDecimal calculatePatchedInvestmentAmount(PatchBudgetDTO data, Budget budget, BigDecimal total, BigDecimal fixedExpenses) {
+        BigDecimal investmentAmount = data.investmentAmount() != null ? data.investmentAmount() : budget.getInvestmentAmount();
+
+        if (data.investmentPercentage() != null) {
+            investmentAmount = total
+                    .subtract(fixedExpenses)
+                    .multiply(BigDecimal.valueOf(data.investmentPercentage()))
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        }
+
+        if (data.totalAmount() != null || data.fixedExpenses() != null) {
+            investmentAmount = total
+                    .subtract(fixedExpenses)
+                    .multiply(BigDecimal.valueOf(budget.getInvestmentPercentage()))
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        }
+
+        return investmentAmount;
+    }
+
+    private int calculatePatchedInvestmentPercentage(PatchBudgetDTO data, Budget budget, BigDecimal investmentAmount, BigDecimal total) {
+        if (data.investmentPercentage() != null) {
+            return data.investmentPercentage();
+        }
+
+        if (data.investmentAmount() != null) {
+            BigDecimal percentage = investmentAmount
+                    .multiply(BigDecimal.valueOf(100))
+                    .divide(total, 0, RoundingMode.HALF_UP);
+
+            return percentage.intValueExact();
+        }
+
+        return budget.getInvestmentPercentage();
+    }
+
+    private BigDecimal calculateAvailableAmount(BigDecimal total, BigDecimal investmentAmount, BigDecimal fixedExpenses) {
+        return total
+                .subtract(investmentAmount)
+                .subtract(fixedExpenses)
+                .setScale(2, RoundingMode.HALF_UP);
     }
 }

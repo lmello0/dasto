@@ -1,23 +1,19 @@
 package com.lmello.dasto.budget.dto.input;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.lmello.dasto.shared.validators.decorators.AtLeastOne;
 import com.lmello.dasto.shared.validators.decorators.MutuallyExclusive;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @MutuallyExclusive(
         fields = {"investmentPercentage", "investmentAmount"},
         message = "Provide either investmentPercentage or investmentAmount, not both"
 )
 @AtLeastOne(
-        fields = {"investmentPercentage", "investmentAmount"},
-        message = "investmentPercentage or investmentAmount must be provided"
+        fields = {"totalAmount", "fixedExpenses", "investmentPercentage", "investmentAmount"}
 )
-public record CreateBudgetDTO(
-        @NotNull(message = "Total amount is required")
+public record PatchBudgetDTO(
         @DecimalMin(value = "0.01", message = "Total amount must be greater than 0")
         BigDecimal totalAmount,
 
@@ -29,11 +25,6 @@ public record CreateBudgetDTO(
         Integer investmentPercentage,
 
         @Positive(message = "Investment amount must be positive")
-        BigDecimal investmentAmount,
-
-        @NotNull(message = "Effective date is required")
-        @FutureOrPresent(message = "New budget must be at present or future")
-        @JsonFormat(pattern = "yyyyMMdd")
-        LocalDate effectiveDate
+        BigDecimal investmentAmount
 ) {
 }

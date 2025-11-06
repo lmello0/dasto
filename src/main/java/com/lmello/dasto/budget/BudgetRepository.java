@@ -20,4 +20,6 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
     Optional<Budget> findActiveByUser(@Param("user") User user);
 
     Page<Budget> findByUserOrderByEffectiveDateDesc(User user, Pageable pageable);
+
+    Optional<Budget> findByUserAndId(User user, Long id);
 }
