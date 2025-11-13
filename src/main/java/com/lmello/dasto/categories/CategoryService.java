@@ -37,6 +37,11 @@ public class CategoryService {
                 .orElseThrow(() -> new CategoryNotExistsException(userId, categoryId));
     }
 
+    public Category getUserCategory(User user, Long categoryId) {
+        return categoryRepository.findByUserAndId(user, categoryId)
+                .orElseThrow(() -> new CategoryNotExistsException(user.getPublicId(), categoryId));
+    }
+
     @Transactional
     public Category createUserCategory(UUID userId, CreateCategoryDTO data) {
         User u = userService.getUserById(userId);

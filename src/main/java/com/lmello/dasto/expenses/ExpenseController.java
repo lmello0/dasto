@@ -1,34 +1,123 @@
 package com.lmello.dasto.expenses;
 
+import com.lmello.dasto.expenses.dto.input.CreateExpenseDTO;
+import com.lmello.dasto.expenses.dto.input.UpdateExpenseDTO;
+import com.lmello.dasto.expenses.dto.output.ExpenseResponse;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users/{userId}/expenses")
 public class ExpenseController {
 
-    @GetMapping
-    public ResponseEntity<?> getExpenses(@PathVariable String userId) {
-        return ResponseEntity.ok("ping");
+    private final ExpenseService expenseService;
+
+    public ExpenseController(ExpenseService expenseService) {
+        this.expenseService = expenseService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getExpense(@PathVariable String userId) {
-        throw new UnsupportedOperationException();
+    @GetMapping
+    public ResponseEntity<Page<ExpenseResponse>> getUserExpenses(
+            @PathVariable UUID userId,
+            Pageable pageable
+    ) {
+        Page<Expense> expenses = expenseService.getUserExpenses(userId, pageable);
+        Page<ExpenseResponse> response = expenses.map(ExpenseResponse::new);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/date/{date}")
+    public ResponseEntity<List<ExpenseResponse>> getExpensesByDate(
+            @PathVariable UUID userId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        List<Expense> expenses = expenseService.getExpensesByDate(userId, date);
+        List<ExpenseResponse> response = expenses.stream()
+                .map(ExpenseResponse::new)
+                .toList();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/range")
+    public ResponseEntity<List<ExpenseResponse>> getExpensesByDateRange(
+            @PathVariable UUID userId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        List<Expense> expenses = expenseService.getExpensesByDateRange(userId, startDate, endDate);
+        List<ExpenseResponse> response = expenses.stream()
+                .map(ExpenseResponse::new)
+                .toList();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<Page<ExpenseResponse>> getExpensesByCategory(
+            @PathVariable UUID userId,
+            @PathVariable Long categoryId,
+            Pageable pageable
+    ) {
+        Page<Expense> expenses = expenseService.getExpensesByCategory(userId, categoryId, pageable);
+        Page<ExpenseResponse> response = expenses.map(ExpenseResponse::new);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{expenseId}")
+    public ResponseEntity<ExpenseResponse> getExpense(
+            @PathVariable UUID userId,
+            @PathVariable Long expenseId
+    ) {
+        Expense expense = expenseService.getExpenseById(userId, expenseId);
+        return ResponseEntity.ok(new ExpenseResponse(expense));
     }
 
     @PostMapping
-    public ResponseEntity<?> addExpense(@PathVariable String userId) {
-        throw new UnsupportedOperationException();
+    public ResponseEntity<ExpenseResponse> createExpense(
+            @PathVariable UUID userId,
+            @RequestBody @Valid CreateExpenseDTO data
+    ) {
+        Expense expense = expenseService.createExpense(userId, data);
+        ExpenseResponse response = new ExpenseResponse(expense);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(expense.getId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(response);
     }
 
-    @PatchMapping
-    public ResponseEntity<?> updateExpense(@PathVariable String userId) {
-        throw new UnsupportedOperationException();
+    @PutMapping("/{expenseId}")
+    public ResponseEntity<ExpenseResponse> updateExpense(
+            @PathVariable UUID userId,
+            @PathVariable Long expenseId,
+            @RequestBody @Valid UpdateExpenseDTO data
+    ) {
+        Expense expense = expenseService.updateExpense(userId, expenseId, data);
+        return ResponseEntity.ok(new ExpenseResponse(expense));
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> deleteExpense(@PathVariable String userId) {
-        throw new UnsupportedOperationException();
+    @DeleteMapping("/{expenseId}")
+    public ResponseEntity<Void> deleteExpense(
+            @PathVariable UUID userId,
+            @PathVariable Long expenseId
+    ) {
+        expenseService.deleteExpense(userId, expenseId);
+        return ResponseEntity.noContent().build();
     }
 }

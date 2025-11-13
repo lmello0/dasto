@@ -1,6 +1,7 @@
 package com.lmello.dasto.expenses;
 
 import com.lmello.dasto.categories.Category;
+import com.lmello.dasto.dailycontrols.DailyControl;
 import com.lmello.dasto.shared.entities.Auditable;
 import com.lmello.dasto.user.User;
 import jakarta.persistence.*;
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Table(name = "expenses")
 @Entity
@@ -33,15 +34,19 @@ public class Expense extends Auditable {
     private String description;
 
     @Column(nullable = false)
-    private LocalDateTime expenseDate;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private LocalDate expenseDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "daily_control_id", nullable = false)
+    private DailyControl dailyControl;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Override
     public boolean equals(Object o) {

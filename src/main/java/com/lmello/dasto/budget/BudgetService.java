@@ -4,6 +4,7 @@ import com.lmello.dasto.budget.dto.input.CreateBudgetDTO;
 import com.lmello.dasto.budget.dto.input.PatchBudgetDTO;
 import com.lmello.dasto.budget.exceptions.ActiveBudgetNotFoundException;
 import com.lmello.dasto.budget.exceptions.MultipleInvestmentValueException;
+import com.lmello.dasto.budget.exceptions.NoBudgetAtDateException;
 import com.lmello.dasto.user.User;
 import com.lmello.dasto.user.UserService;
 import jakarta.transaction.Transactional;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -176,5 +178,10 @@ public class BudgetService {
                 .subtract(investmentAmount)
                 .subtract(fixedExpenses)
                 .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public Budget getActiveBudgetAtDate(User user, LocalDate date) {
+        return budgetRepository.findByUserActiveAtDate(user, date)
+                .orElseThrow(() -> new NoBudgetAtDateException(user.getPublicId(), date));
     }
 }
