@@ -2,7 +2,6 @@ package com.lmello.dasto.user;
 
 import com.lmello.dasto.user.dto.input.CreateUserDTO;
 import com.lmello.dasto.user.dto.input.PatchUserDTO;
-import com.lmello.dasto.user.dto.output.UserDetailResponse;
 import com.lmello.dasto.user.dto.output.UserResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -33,17 +32,17 @@ public class UserController {
     }
 
     @GetMapping("/{publicId}")
-    public ResponseEntity<UserDetailResponse> getUserById(@PathVariable UUID publicId) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable UUID publicId) {
         User u = userService.getUserById(publicId);
-        UserDetailResponse user = new UserDetailResponse(u);
+        UserResponse user = new UserResponse(u);
 
         return ResponseEntity.ok(user);
     }
 
     @PostMapping
-    public ResponseEntity<UserDetailResponse> createUser(@Valid @RequestBody CreateUserDTO data) {
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserDTO data) {
         User u = userService.create(data);
-        UserDetailResponse user = new UserDetailResponse(u);
+        UserResponse user = new UserResponse(u);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequestUri()
