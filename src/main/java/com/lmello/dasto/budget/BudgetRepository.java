@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface BudgetRepository extends JpaRepository<Budget, Long> {
     @Query("""
@@ -30,4 +31,6 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
             ORDER BY b.effectiveDate DESC
             """)
     Optional<Budget> findByUserActiveAtDate(User user, LocalDate date);
+
+    Optional<Budget> findByUserAndId(User user, Long budgetId);
 }

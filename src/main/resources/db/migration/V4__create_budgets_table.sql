@@ -2,7 +2,6 @@ create table budgets (
     id bigint generated always as identity,
 
     total_amount decimal(10,2) not null,
-    investment_percentage int not null check(investment_percentage >= 0 and investment_percentage <= 100),
 
     effective_date date not null default now(),
     termination_date date,

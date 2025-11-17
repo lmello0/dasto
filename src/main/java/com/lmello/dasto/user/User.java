@@ -2,7 +2,6 @@ package com.lmello.dasto.user;
 
 import com.lmello.dasto.budget.Budget;
 import com.lmello.dasto.categories.Category;
-import com.lmello.dasto.dailycontrols.DailyControl;
 import com.lmello.dasto.shared.entities.Auditable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -44,9 +43,6 @@ public class User extends Auditable {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Budget> budgets = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<DailyControl> dailyControls = new ArrayList<>();
 
     public void addCategory(Category category) {
         categories.add(category);

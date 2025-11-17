@@ -1,6 +1,8 @@
+create extension if not exists "uuid-ossp";
+
 create table users(
 	id bigint generated always as identity,
-	public_id varchar(36) not null,
+	public_id uuid not null,
 
 	first_name varchar(255) not null,
 	last_name varchar(255),

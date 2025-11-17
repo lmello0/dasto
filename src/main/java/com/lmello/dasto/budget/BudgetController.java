@@ -64,7 +64,7 @@ public class BudgetController {
             @PathVariable Long budgetId,
             @RequestBody @Valid PatchBudgetDTO data
     ) {
-        Budget budget = budgetService.patchBudget(userId, budgetId, data);
+        Budget budget = budgetService.putBudget(userId, budgetId, data);
         BudgetResponse response = new BudgetResponse(budget);
 
         return ResponseEntity.ok(response);

@@ -2,6 +2,7 @@ package com.lmello.dasto.expenses.dto.output;
 
 import com.lmello.dasto.categories.Category;
 import com.lmello.dasto.expenses.Expense;
+import com.lmello.dasto.expenses.ExpenseType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -9,10 +10,13 @@ import java.time.LocalDateTime;
 
 public record ExpenseResponse(
         Long id,
+        LocalDate date,
         String title,
         BigDecimal amount,
+        ExpenseType type,
         String description,
-        LocalDate expenseDate,
+        int installmentQuantity,
+        LocalDate finalPayment,
         CategorySummary category,
         LocalDateTime createdAt,
         String createdBy,
@@ -22,10 +26,13 @@ public record ExpenseResponse(
     public ExpenseResponse(Expense expense) {
         this(
                 expense.getId(),
+                expense.getDate(),
                 expense.getTitle(),
                 expense.getAmount(),
+                expense.getType(),
                 expense.getDescription(),
-                expense.getExpenseDate(),
+                expense.getInstallmentQuantity(),
+                expense.getFinalPayment(),
                 new CategorySummary(expense.getCategory()),
                 expense.getCreatedAt(),
                 expense.getCreatedBy(),

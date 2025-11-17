@@ -1,7 +1,6 @@
 package com.lmello.dasto.expenses;
 
 import com.lmello.dasto.categories.Category;
-import com.lmello.dasto.dailycontrols.DailyControl;
 import com.lmello.dasto.shared.entities.Auditable;
 import com.lmello.dasto.user.User;
 import jakarta.persistence.*;
@@ -24,25 +23,29 @@ public class Expense extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "expense_date", nullable = false)
+    private LocalDate date;
+
     @Column(nullable = false, length = 32)
     private String title;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 
+    @Embedded
+    @Column(nullable = false)
+    private ExpenseType type;
+
     @Column(length = 4000)
     private String description;
 
-    @Column(nullable = false)
-    private LocalDate expenseDate;
+    private Integer installmentQuantity;
+
+    private LocalDate finalPayment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "daily_control_id", nullable = false)
-    private DailyControl dailyControl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

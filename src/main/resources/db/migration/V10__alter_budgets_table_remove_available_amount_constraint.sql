@@ -1,2 +1,0 @@
-alter table budgets
-drop constraint budgets_available_amount_check;

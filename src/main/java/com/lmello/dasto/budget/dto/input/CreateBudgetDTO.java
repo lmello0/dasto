@@ -7,33 +7,20 @@ import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-@MutuallyExclusive(
-        fields = {"investmentPercentage", "investmentAmount"},
-        message = "Provide either investmentPercentage or investmentAmount, not both"
-)
-@AtLeastOne(
-        fields = {"investmentPercentage", "investmentAmount"},
-        message = "investmentPercentage or investmentAmount must be provided"
-)
 public record CreateBudgetDTO(
         @NotNull(message = "Total amount is required")
         @DecimalMin(value = "0.01", message = "Total amount must be greater than 0")
         BigDecimal totalAmount,
 
-        @PositiveOrZero(message = "Fixed expenses must be positive or zero")
-        BigDecimal fixedExpenses,
-
-        @Min(value = 0, message = "Investment percentage must be at least 0")
-        @Max(value = 100, message = "Investment percentage cannot exceed 100")
-        Integer investmentPercentage,
-
-        @Positive(message = "Investment amount must be positive")
-        BigDecimal investmentAmount,
-
         @NotNull(message = "Effective date is required")
-        @FutureOrPresent(message = "New budget must be at present or future")
+        @FutureOrPresent(message = "Budget effective date must be at present or future")
         @JsonFormat(pattern = "yyyyMMdd")
-        LocalDate effectiveDate
+        LocalDate effectiveDate,
+
+        @FutureOrPresent(message = "Budget termination date must be at present or future")
+        @JsonFormat(pattern = "yyyyMMdd")
+        LocalDate terminationDate
 ) {
 }

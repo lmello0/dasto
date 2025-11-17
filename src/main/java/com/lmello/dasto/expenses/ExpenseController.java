@@ -1,7 +1,7 @@
 package com.lmello.dasto.expenses;
 
 import com.lmello.dasto.expenses.dto.input.CreateExpenseDTO;
-import com.lmello.dasto.expenses.dto.input.UpdateExpenseDTO;
+import com.lmello.dasto.expenses.dto.input.PatchExpenseDTO;
 import com.lmello.dasto.expenses.dto.output.ExpenseResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -106,9 +106,9 @@ public class ExpenseController {
     public ResponseEntity<ExpenseResponse> updateExpense(
             @PathVariable UUID userId,
             @PathVariable Long expenseId,
-            @RequestBody @Valid UpdateExpenseDTO data
+            @RequestBody @Valid PatchExpenseDTO data
     ) {
-        Expense expense = expenseService.updateExpense(userId, expenseId, data);
+        Expense expense = expenseService.patchExpense(userId, expenseId, data);
         return ResponseEntity.ok(new ExpenseResponse(expense));
     }
 

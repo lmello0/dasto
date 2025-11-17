@@ -1,5 +1,6 @@
 package com.lmello.dasto.budget;
 
+import com.lmello.dasto.budget.dto.input.CreateBudgetDTO;
 import com.lmello.dasto.shared.entities.Auditable;
 import com.lmello.dasto.user.User;
 import jakarta.persistence.*;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Table(name = "budgets")
 @Entity
@@ -25,34 +26,28 @@ public class Budget extends Auditable {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
 
-    @Column(precision = 10, scale = 2)
-    private BigDecimal fixedExpenses;
-
     @Column(nullable = false)
-    private int investmentPercentage;
+    private LocalDate effectiveDate = LocalDate.now();
 
-    @Column(precision = 10, scale = 2)
-    private BigDecimal investmentAmount;
-
-    @Column(precision = 10, scale = 2)
-    private BigDecimal availableAmount;
-
-    @Column(nullable = false)
-    private LocalDateTime effectiveDate = LocalDateTime.now();
-
-    private LocalDateTime terminationDate;
+    private LocalDate terminationDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    public Budget(CreateBudgetDTO data) {
+        this.totalAmount = data.totalAmount();
+        this.effectiveDate = data.effectiveDate();
+        this.terminationDate = data.terminationDate();
+    }
+
     public boolean isActive() {
-        LocalDateTime today = LocalDateTime.now();
+        LocalDate today = LocalDate.now();
         return (effectiveDate.isBefore(today) || effectiveDate.isEqual(today))
                 && (terminationDate == null || terminationDate.isAfter(today));
     }
 
-    public void terminate(LocalDateTime terminationDate) {
+    public void terminate(LocalDate terminationDate) {
         this.terminationDate = terminationDate;
     }
 

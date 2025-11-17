@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
-    Page<Expense> findByUserOrderByExpenseDateDesc(User user, Pageable pageable);
+    Page<Expense> findByUserOrderByDateDesc(User user, Pageable pageable);
 
-    List<Expense> findByUserAndExpenseDate(User user, LocalDate date);
+    List<Expense> findByUserAndDate(User user, LocalDate date);
 
-    List<Expense> findByUserAndExpenseDateBetween(User user, LocalDate startDate, LocalDate endDate);
+    List<Expense> findByUserAndDateBetween(User user, LocalDate startDate, LocalDate endDate);
 
     Page<Expense> findByUserAndCategory(User user, Category category, Pageable pageable);
 
@@ -27,7 +27,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             SELECT SUM(e.amount)
             FROM Expense e
             WHERE e.user = :user
-            AND e.expenseDate BETWEEN :startDate AND :endDate
+            AND e.date BETWEEN :startDate AND :endDate
             """)
     Optional<BigDecimal> sumByUserAndDateRange(User user, LocalDate startDate, LocalDate endDate);
 }

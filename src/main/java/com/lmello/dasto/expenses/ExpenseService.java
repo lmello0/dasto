@@ -2,11 +2,11 @@ package com.lmello.dasto.expenses;
 
 import com.lmello.dasto.categories.Category;
 import com.lmello.dasto.categories.CategoryService;
-import com.lmello.dasto.dailycontrols.DailyControl;
-import com.lmello.dasto.dailycontrols.DailyControlService;
 import com.lmello.dasto.expenses.dto.input.CreateExpenseDTO;
-import com.lmello.dasto.expenses.dto.input.UpdateExpenseDTO;
+import com.lmello.dasto.expenses.dto.input.PatchExpenseDTO;
 import com.lmello.dasto.expenses.exceptions.ExpenseNotFoundException;
+import com.lmello.dasto.expenses.exceptions.NotInstallmentExpenseException;
+import com.lmello.dasto.expenses.exceptions.RequiredInstallmentQuantityException;
 import com.lmello.dasto.user.User;
 import com.lmello.dasto.user.UserService;
 import jakarta.transaction.Transactional;
@@ -25,36 +25,33 @@ public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
 
-    private final DailyControlService dailyControlService;
     private final CategoryService categoryService;
     private final UserService userService;
 
     public ExpenseService(
             ExpenseRepository expenseRepository,
-            DailyControlService dailyControlService,
             CategoryService categoryService,
             UserService userService
     ) {
         this.expenseRepository = expenseRepository;
 
-        this.dailyControlService = dailyControlService;
         this.categoryService = categoryService;
         this.userService = userService;
     }
 
     public Page<Expense> getUserExpenses(UUID userId, Pageable pageable) {
         User user = userService.getUserById(userId);
-        return expenseRepository.findByUserOrderByExpenseDateDesc(user, pageable);
+        return expenseRepository.findByUserOrderByDateDesc(user, pageable);
     }
 
     public List<Expense> getExpensesByDate(UUID userId, LocalDate date) {
         User user = userService.getUserById(userId);
-        return expenseRepository.findByUserAndExpenseDate(user, date);
+        return expenseRepository.findByUserAndDate(user, date);
     }
 
     public List<Expense> getExpensesByDateRange(UUID userId, LocalDate startDate, LocalDate endDate) {
         User user = userService.getUserById(userId);
-        return expenseRepository.findByUserAndExpenseDateBetween(user, startDate, endDate);
+        return expenseRepository.findByUserAndDateBetween(user, startDate, endDate);
     }
 
     public Page<Expense> getExpensesByCategory(UUID userId, Long categoryId, Pageable pageable) {
@@ -73,69 +70,101 @@ public class ExpenseService {
 
     @Transactional
     public Expense createExpense(UUID userId, CreateExpenseDTO data) {
+        if (data.type() == ExpenseType.INSTALLMENT && data.installmentQuantity() == null) {
+            throw new RequiredInstallmentQuantityException();
+        }
+
+        if (data.type() != ExpenseType.INSTALLMENT && data.installmentQuantity() != null) {
+            throw new NotInstallmentExpenseException();
+        }
+
         User user = userService.getUserById(userId);
         Category category = categoryService.getUserCategory(user, data.categoryId());
 
-        DailyControl dailyControl = dailyControlService
-                .getOrCreateDailyControl(userId, data.expenseDate());
-
         Expense expense = new Expense();
+
+        expense.setDate(data.date());
         expense.setTitle(data.title());
         expense.setAmount(data.amount());
+        expense.setType(data.type());
         expense.setDescription(data.description());
-        expense.setExpenseDate(data.expenseDate());
+        expense.setInstallmentQuantity(data.installmentQuantity());
+
+        if (data.type() == ExpenseType.INSTALLMENT) {
+            expense.setFinalPayment(data.date().plusMonths(data.installmentQuantity()));
+        }
+
         expense.setCategory(category);
         expense.setUser(user);
 
-        dailyControl.addExpense(expense);
-
-        Expense saved = expenseRepository.save(expense);
-
-        dailyControlService.recalculateFromDate(user, data.expenseDate());
-
-        return saved;
+        return expenseRepository.save(expense);
     }
 
     @Transactional
-    public Expense updateExpense(UUID userId, Long expenseId, UpdateExpenseDTO data) {
+    public Expense patchExpense(UUID userId, Long expenseId, PatchExpenseDTO data) {
         User user = userService.getUserById(userId);
-
         Expense expense = expenseRepository.findById(expenseId)
                 .orElseThrow(() -> new ExpenseNotFoundException(userId, expenseId));
 
-        LocalDate oldDate = expense.getExpenseDate();
-        LocalDate newDate = data.expenseDate();
-        boolean dateChanged = !oldDate.equals(newDate);
+        ExpenseType finalType = data.type() != null ? data.type() : expense.getType();
 
-        if (dateChanged) {
-            DailyControl oldControl = expense.getDailyControl();
-            oldControl.removeExpense(expense);
+        if (finalType == ExpenseType.INSTALLMENT) {
+            Integer finalInstallmentQuantity = data.installmentQuantity() != null
+                    ? data.installmentQuantity()
+                    : expense.getInstallmentQuantity();
 
-            DailyControl newControl = dailyControlService
-                    .getOrCreateDailyControl(user, newDate);
-            newControl.addExpense(expense);
+            if (finalInstallmentQuantity == null || finalInstallmentQuantity <= 0) {
+                throw new RequiredInstallmentQuantityException();
+            }
         }
 
-        expense.setTitle(data.title());
-        expense.setAmount(data.amount());
-        expense.setDescription(data.description());
-        expense.setExpenseDate(newDate);
+        if (finalType != ExpenseType.INSTALLMENT && data.installmentQuantity() != null) {
+            throw new NotInstallmentExpenseException();
+        }
+
+        if (data.date() != null) {
+            expense.setDate(data.date());
+        }
+
+        if (data.title() != null) {
+            expense.setTitle(data.title());
+        }
+
+        if (data.amount() != null) {
+            expense.setAmount(data.amount());
+        }
+
+        if (data.type() != null) {
+            expense.setType(data.type());
+        }
+
+        if (data.description() != null) {
+            expense.setDescription(data.description());
+        }
+
+        if (data.installmentQuantity() != null) {
+            expense.setInstallmentQuantity(data.installmentQuantity());
+        } else if (finalType != ExpenseType.INSTALLMENT) {
+            expense.setInstallmentQuantity(null);
+        }
 
         if (data.categoryId() != null) {
             Category category = categoryService.getUserCategory(user, data.categoryId());
             expense.setCategory(category);
         }
 
-        Expense saved = expenseRepository.save(expense);
+        if (expense.getType() == ExpenseType.INSTALLMENT) {
+            LocalDate dateToUse = data.date() != null ? data.date() : expense.getDate();
+            int installments = data.installmentQuantity() != null
+                    ? data.installmentQuantity()
+                    : expense.getInstallmentQuantity();
 
-        if (dateChanged) {
-            LocalDate earliestDate = oldDate.isBefore(newDate) ? oldDate : newDate;
-            dailyControlService.recalculateFromDate(user, earliestDate);
+            expense.setFinalPayment(dateToUse.plusMonths(installments));
         } else {
-            dailyControlService.recalculateFromDate(user, newDate);
+            expense.setFinalPayment(null);
         }
 
-        return saved;
+        return expenseRepository.save(expense);
     }
 
     @Transactional
@@ -145,11 +174,7 @@ public class ExpenseService {
         Expense expense = expenseRepository.findByUserAndId(user, expenseId)
                 .orElseThrow(() -> new ExpenseNotFoundException(userId, expenseId));
 
-        LocalDate expenseDate = expense.getExpenseDate();
-
         expenseRepository.delete(expense);
-
-        dailyControlService.recalculateFromDate(user, expenseDate);
     }
 
     public BigDecimal getMonthlyTotal(UUID userId, YearMonth yearMonth) {
