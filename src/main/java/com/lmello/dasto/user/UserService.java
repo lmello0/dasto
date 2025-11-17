@@ -39,7 +39,6 @@ public class UserService {
         final String lastName = data.lastName();
         final String passwordHash = passwordEncoder.encode(data.password());
 
-
         if (userRepository.existsByEmail(email)) {
             throw new UserAlreadyExistsException(email);
         }

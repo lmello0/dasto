@@ -12,6 +12,7 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Table(name = "users")
 @Entity
@@ -39,7 +40,7 @@ public class User extends Auditable {
     private String passwordHash;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Category> categories = new ArrayList<>();
+    private List<Category> categories = addInitialCategories();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Budget> budgets = new ArrayList<>();
@@ -57,6 +58,35 @@ public class User extends Auditable {
     public void addBudget(Budget budget) {
         budgets.add(budget);
         budget.setUser(this);
+    }
+
+    private List<Category> addInitialCategories() {
+        return Stream.of(
+                        "Food",
+                        "Transportation",
+                        "Housing",
+                        "Utilities",
+                        "Healthcare",
+                        "Entertainment",
+                        "Shopping",
+                        "Education",
+                        "Personal Care",
+                        "Insurance",
+                        "Savings & Investments",
+                        "Debt Payments",
+                        "Gifts & Donations",
+                        "Travel",
+                        "Subscriptions",
+                        "Other"
+                )
+                .map(name -> {
+                    Category c = new Category();
+                    c.setName(name);
+                    c.setUser(this);
+
+                    return c;
+                })
+                .toList();
     }
 
     @PrePersist
