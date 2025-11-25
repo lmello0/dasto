@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -58,17 +59,15 @@ public class UserService {
         User existing = userRepository.findByPublicId(publicId)
                 .orElseThrow(UserNotExistsException::new);
 
-        if (!data.firstName().equals(existing.getFirstName())) {
+        if (data.firstName() != null && !data.firstName().equals(existing.getFirstName())) {
             existing.setFirstName(data.firstName());
         }
 
-        if (
-                data.lastName() == null || existing.getLastName() != null && !data.lastName().equals(existing.getLastName())
-        ) {
+        if (!Objects.equals(data.lastName(), existing.getLastName())) {
             existing.setLastName(data.lastName());
         }
 
-        if (!data.email().equals(existing.getEmail())) {
+        if (data.email() != null && !data.email().equals(existing.getEmail())) {
             if (userRepository.existsByEmail(data.email())) {
                 throw new EmailInUseException(data.email());
             }

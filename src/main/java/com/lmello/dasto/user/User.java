@@ -12,6 +12,7 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Table(name = "users")
@@ -86,7 +87,7 @@ public class User extends Auditable {
 
                     return c;
                 })
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @PrePersist
